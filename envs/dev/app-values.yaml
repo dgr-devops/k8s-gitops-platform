@@ -9,6 +9,7 @@ app:
   existingSecret: demo-app-secret
 
 ingress:
+  className: nginx-typo
   host: app-dev.local
 
 serviceMonitor:
