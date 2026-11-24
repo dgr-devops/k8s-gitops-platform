@@ -6,7 +6,7 @@ image:
 
 app:
   greeting: "Hola desde dev"
-  existingSecret: demo-app-secret-typo
+  existingSecret: demo-app-secret
 
 ingress:
   host: app-dev.local
