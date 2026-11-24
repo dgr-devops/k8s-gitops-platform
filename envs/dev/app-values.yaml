@@ -1,0 +1,14 @@
+replicaCount: 1
+
+image:
+  # El CI del repo de la app reescribe esta línea con sha-<commit>.
+  tag: v1.0.0
+
+app:
+  greeting: "Hola desde dev"
+
+ingress:
+  host: app-dev.local
+
+serviceMonitor:
+  enabled: true

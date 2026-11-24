@@ -1,0 +1,14 @@
+replicaCount: 2
+
+image:
+  # Prod se promociona a mano: se cambia esta etiqueta mediante PR.
+  tag: v1.0.0
+
+app:
+  greeting: "Hola desde prod"
+
+ingress:
+  host: app-prod.local
+
+serviceMonitor:
+  enabled: true

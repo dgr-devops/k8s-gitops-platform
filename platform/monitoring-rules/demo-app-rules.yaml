@@ -1,0 +1,33 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: demo-app
+  namespace: monitoring
+spec:
+  groups:
+    - name: demo-app.rules
+      rules:
+        - alert: DemoAppUnavailable
+          expr: kube_deployment_status_replicas_available{namespace=~"demo-.*"} == 0
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "{{ $labels.namespace }}/{{ $labels.deployment }} sin réplicas disponibles"
+            description: "El Deployment no tiene ninguna réplica lista desde hace más de 1 minuto."
+        - alert: DemoAppPodNotReady
+          expr: kube_pod_status_ready{namespace=~"demo-.*", condition="true"} == 0
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} no está listo"
+            description: "El pod lleva más de 1 minuto sin pasar la sonda de readiness."
+        - alert: DemoAppOOMKilled
+          expr: kube_pod_container_status_last_terminated_reason{namespace=~"demo-.*", reason="OOMKilled"} == 1
+          for: 0m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Contenedor {{ $labels.namespace }}/{{ $labels.pod }} terminado por OOMKilled"
+            description: "Revisa memory limits del chart en envs/<entorno>/app-values.yaml."

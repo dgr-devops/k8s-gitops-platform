@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: demo-app-dev
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  project: default
+  sources:
+    # Chart Helm: vive en el repo de la aplicación.
+    - repoURL: https://github.com/dgr-devops/k8s-gitops-app.git
+      targetRevision: main
+      path: chart
+      helm:
+        releaseName: demo-app-dev
+        valueFiles:
+          - $values/envs/dev/app-values.yaml
+    # Valores del entorno: viven en este repo.
+    - repoURL: https://github.com/dgr-devops/k8s-gitops-platform.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: demo-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - SkipDryRunOnMissingResource=true
+    retry:
+      limit: 10
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m
