@@ -117,15 +117,17 @@ secrets                Synced        Healthy
   incidentes.
 - **6 incidentes provocados** con diagnóstico y arreglo reales: ver
   [docs/incidentes-provocados.md](docs/incidentes-provocados.md).
-- **CI en GitHub:** yamllint, `kubectl kustomize`, kubeconform, `helm lint`/`template` con los valores de
+- **Imagen desde GHCR:** se cambió `envs/dev/app-values.yaml` a `tag: sha-ce9814c`; el kubelet descargó
+  `ghcr.io/dgr-devops/k8s-gitops-app:sha-ce9814c` ("Successfully pulled image ... 43267717 bytes") y el pod nuevo
+  sustituyó al anterior sin interrupción.
+- **CI en GitHub (verde en ambos repos):** yamllint, `kubectl kustomize`, kubeconform, `helm lint`/`template` con los valores de
   cada entorno y ShellCheck (workflow reutilizable de
   [github-actions-reusable-workflows](https://github.com/dgr-devops/github-actions-reusable-workflows)).
 
 ## Qué NO se verificó / límites
 
-- La imagen no se descarga de GHCR en el cluster: se **carga con `kind load`** desde Docker local, porque
-  el paquete de GHCR nace privado y cambiar su visibilidad es un paso manual en la web. La publicación en
-  GHCR la hace el CI del repo de la app (ver su README).
+- Prod usa la imagen `v1.0.0` **cargada con `kind load`** desde Docker local (no existe esa etiqueta en GHCR). Dev sí se
+  desplegó con la imagen publicada por el CI (`sha-ce9814c`), descargada de GHCR (el paquete es público).
 - El *bump* automático de etiqueta entre repos necesita un secreto `GITOPS_TOKEN` (PAT con permiso de
   escritura en este repo) que no está configurado; sin él, ese paso se omite con un aviso.
 - Dev y prod comparten cluster; no hay aislamiento real entre entornos ni RBAC por entorno.
