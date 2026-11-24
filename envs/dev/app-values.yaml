@@ -13,3 +13,9 @@ ingress:
 
 serviceMonitor:
   enabled: true
+
+resources:
+  requests:
+    memory: 4Mi
+  limits:
+    memory: 4Mi
