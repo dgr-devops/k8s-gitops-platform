@@ -16,6 +16,6 @@ serviceMonitor:
 
 resources:
   requests:
-    memory: 4Mi
+    memory: 12Mi
   limits:
-    memory: 4Mi
+    memory: 12Mi
