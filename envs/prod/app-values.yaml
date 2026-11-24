@@ -6,6 +6,7 @@ image:
 
 app:
   greeting: "Hola desde prod"
+  existingSecret: demo-app-secret
 
 ingress:
   host: app-prod.local
