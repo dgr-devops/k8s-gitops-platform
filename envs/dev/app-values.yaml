@@ -7,6 +7,7 @@ image:
 app:
   greeting: "Hola desde dev"
   existingSecret: demo-app-secret
+  failReadiness: true
 
 ingress:
   host: app-dev.local
