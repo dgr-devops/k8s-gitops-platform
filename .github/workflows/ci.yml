@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint-shell:
+    uses: dgr-devops/github-actions-reusable-workflows/.github/workflows/lint-shell.yml@v1
+    with:
+      exclude-dirs: ".git .bin"
+
+  manifests:
+    name: yamllint, kustomize y kubeconform
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Chart de la app (repo dgr-devops/k8s-gitops-app)
+        uses: actions/checkout@v4
+        with:
+          repository: dgr-devops/k8s-gitops-app
+          path: app-src
+          persist-credentials: false
+      - name: Instalar herramientas
+        run: |
+          pip install --disable-pip-version-check yamllint==1.35.1
+          curl -sSL https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz | tar xz kubeconform
+      - name: yamllint
+        run: yamllint -c .yamllint.yml apps bootstrap envs platform .github
+      - name: kustomize build de platform/*
+        run: |
+          for dir in platform/*/; do
+            echo "== $dir"
+            kubectl kustomize "$dir" | ./kubeconform -strict -ignore-missing-schemas -summary
+          done
+      - name: Aplicaciones Argo CD y aplicación raíz
+        run: ./kubeconform -strict -ignore-missing-schemas -summary apps bootstrap/root-app.yaml
+      - name: helm lint y template del chart con los valores de cada entorno
+        run: |
+          for env in dev prod; do
+            echo "== $env"
+            helm lint app-src/chart -f "envs/$env/app-values.yaml"
+            helm template "demo-app-$env" app-src/chart -f "envs/$env/app-values.yaml" \
+              | ./kubeconform -strict -ignore-missing-schemas -summary
+          done
